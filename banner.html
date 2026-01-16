@@ -30,34 +30,102 @@
       text-transform: uppercase;
     }
 
-    /* Optional: Hide banner if not dev environment */
     .dev-banner--hidden {
       display: none;
+    }
+
+    .dev-banner--loading {
+      background-color: #cccccc;
     }
   </style>
 </head>
 <body>
-  <!-- DEV ENVIRONMENT Banner -->
-  <div class="dev-banner" id="devBanner">
-    <span class="dev-banner__text">DEV ENVIRONMENT</span>
+  <div class="dev-banner dev-banner--hidden" id="devBanner">
+    <span class="dev-banner__text">Loading...</span>
   </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
   <script>
+    // Ambil URL params
     const urlParams = new URLSearchParams(window.location.search);
-    const envParam = urlParams.get('env');
-    
+    const clientParam = urlParams.get('client');
+
+    // Konfigurasi API
+    const API_CONFIG = {
+      endpoint: 'https://api-oos.jojonomic.com/25236/current-env',
+    };
+
     const devBanner = document.getElementById('devBanner');
     const bannerText = document.querySelector('.dev-banner__text');
-    
-    if (envParam?.startsWith('dev')) {
-      bannerText.textContent = 'DEV ENVIRONMENT';
-      devBanner.classList.remove('dev-banner--hidden');
-    } else if (envParam?.startsWith('staging')) {
-      bannerText.textContent = 'STAGING ENVIRONMENT';
-      devBanner.classList.remove('dev-banner--hidden');
-    } else {
-      devBanner.classList.add('dev-banner--hidden');
+
+    async function fetchEnvironment() {
+      try {
+        devBanner.classList.remove('dev-banner--hidden');
+        devBanner.classList.add('dev-banner--loading');
+        bannerText.textContent = 'Loading...';
+
+        const response = await axios.post(
+          API_CONFIG.endpoint,
+          { client: clientParam },
+          { withCredentials: true }
+        );
+
+        devBanner.classList.remove('dev-banner--loading');
+        updateBanner(response?.data?.stats);
+
+      } catch (error) {
+        console.error('Error fetching environment:', error);
+        
+        // Log detail error untuk debugging
+        if (error.name === 'AbortError') {
+          console.error('Request timeout');
+        } else if (error.message.includes('Failed to fetch')) {
+          console.error('CORS or Network error');
+        }
+        
+        fallbackToUrlParams();
+      }
     }
+
+    function updateBanner(environment) {
+      if (!environment) {
+        devBanner.classList.add('dev-banner--hidden');
+        return;
+      }
+
+      const env = environment.toLowerCase();
+
+      if (env.startsWith('dev')) {
+        bannerText.textContent = 'DEV ENVIRONMENT';
+        devBanner.style.backgroundColor = '#64e846';
+        devBanner.classList.remove('dev-banner--hidden');
+      } else if (env.startsWith('staging')) {
+        bannerText.textContent = 'STAGING ENVIRONMENT';
+        devBanner.style.backgroundColor = '#ffa500';
+        devBanner.classList.remove('dev-banner--hidden');
+      } else if (env.startsWith('prod') || env.startsWith('production')) {
+        devBanner.classList.add('dev-banner--hidden');
+      } else {
+        bannerText.textContent = `${environment.toUpperCase()} ENVIRONMENT`;
+        devBanner.style.backgroundColor = '#6c757d';
+        devBanner.classList.remove('dev-banner--hidden');
+      }
+    }
+
+    function fallbackToUrlParams() {
+      devBanner.classList.remove('dev-banner--loading');
+      
+      const envParam = urlParams.get('env');
+      
+      if (envParam) {
+        updateBanner(envParam);
+      } else {
+        devBanner.classList.add('dev-banner--hidden');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchEnvironment();
+    });
   </script>
 </body>
 </html>
