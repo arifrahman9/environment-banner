@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environment Banner</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    .dev-banner {
+      width: 100%;
+      background-color: #64e846;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .dev-banner__text {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Optional: Hide banner if not dev environment */
+    .dev-banner--hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- DEV ENVIRONMENT Banner -->
+  <div class="dev-banner" id="devBanner">
+    <span class="dev-banner__text">DEV ENVIRONMENT</span>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const envParam = urlParams.get('env');
+    
+    // Use URL param if available, otherwise default to 'production'
+    const environment = envParam || 'production';
+    
+    const devBanner = document.getElementById('devBanner');
+    
+    if (environment?.startsWith('prod')) {
+      devBanner.classList.add('dev-banner--hidden');
+    }
+  </script>
+</body>
+</html>
