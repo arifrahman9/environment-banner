@@ -46,12 +46,16 @@
     const urlParams = new URLSearchParams(window.location.search);
     const envParam = urlParams.get('env');
     
-    // Use URL param if available, otherwise default to 'production'
-    const environment = envParam || 'production';
-    
     const devBanner = document.getElementById('devBanner');
+    const bannerText = document.querySelector('.dev-banner__text');
     
-    if (environment?.startsWith('prod')) {
+    if (envParam?.startsWith('dev')) {
+      bannerText.textContent = 'DEV ENVIRONMENT';
+      devBanner.classList.remove('dev-banner--hidden');
+    } else if (envParam?.startsWith('staging')) {
+      bannerText.textContent = 'STAGING ENVIRONMENT';
+      devBanner.classList.remove('dev-banner--hidden');
+    } else {
       devBanner.classList.add('dev-banner--hidden');
     }
   </script>
