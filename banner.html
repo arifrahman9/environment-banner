@@ -33,17 +33,12 @@
     .dev-banner--hidden {
       display: none;
     }
-
-    .dev-banner--loading {
-      background-color: #cccccc;
-    }
   </style>
 </head>
 <body>
   <div class="dev-banner dev-banner--hidden" id="devBanner">
-    <span class="dev-banner__text">Loading...</span>
+    <span class="dev-banner__text"></span>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
   <script>
     // Ambil URL params
     const urlParams = new URLSearchParams(window.location.search);
@@ -59,18 +54,20 @@
 
     async function fetchEnvironment() {
       try {
-        devBanner.classList.remove('dev-banner--hidden');
-        devBanner.classList.add('dev-banner--loading');
-        bannerText.textContent = 'Loading...';
+        const response = await fetch(API_CONFIG.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ client: clientParam })
+        });
 
-        const response = await axios.post(
-          API_CONFIG.endpoint,
-          { client: clientParam },
-          { withCredentials: true }
-        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        devBanner.classList.remove('dev-banner--loading');
-        updateBanner(response?.data?.stats);
+        const data = await response.json();
+        updateBanner(data?.status);
 
       } catch (error) {
         console.error('Error fetching environment:', error);
@@ -112,8 +109,6 @@
     }
 
     function fallbackToUrlParams() {
-      devBanner.classList.remove('dev-banner--loading');
-      
       const envParam = urlParams.get('env');
       
       if (envParam) {
