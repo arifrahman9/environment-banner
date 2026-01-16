@@ -24,14 +24,49 @@
 
     .dev-banner__text {
       color: white;
-      font-size: 18px;
+      font-size: clamp(12px, 3vw, 18px);
       font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: clamp(0.5px, 0.3vw, 2px);
       text-transform: uppercase;
+      word-break: break-word;
     }
 
     .dev-banner--hidden {
       display: none;
+    }
+
+    /* Responsive breakpoints */
+    @media screen and (max-width: 768px) {
+      .dev-banner {
+        padding: 10px 15px;
+      }
+      
+      .dev-banner__text {
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .dev-banner {
+        padding: 8px 10px;
+      }
+      
+      .dev-banner__text {
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    @media screen and (max-width: 320px) {
+      .dev-banner {
+        padding: 6px 8px;
+      }
+      
+      .dev-banner__text {
+        font-size: 10px;
+        letter-spacing: 0.3px;
+      }
     }
   </style>
 </head>
